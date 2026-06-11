@@ -9,7 +9,7 @@ class Workspace extends Model
     protected $fillable = ['name', 'slug'];
 
     public function users() {
-        return $this->belongsToMany(User::class)
+        return $this->belongsToMany(User::class, 'workspace_user')
                     ->withPivot('role')
                     ->withTimestamps();
     }
