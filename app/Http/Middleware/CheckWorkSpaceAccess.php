@@ -33,7 +33,7 @@ class CheckWorkSpaceAccess
             ], 403);
         }
 
-        $request->attributes->set('workspaceId', $workspaceId);
+        $request->attributes->set('workspace_id', $workspaceId);
 
         return $next($request);
     }

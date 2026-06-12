@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 class ProjectService {
     public function getAllProjects(int $workspaceId): Collection
     {
-        return Project::where('workspace_id', $workspaceId);
+        return Project::where('workspace_id', $workspaceId)->get();
     }
     public function createProject(int $workspaceId, array $data): Project
     {
