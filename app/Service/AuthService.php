@@ -10,8 +10,6 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthService {
-
-
     public function register(array $data) {
         return DB::transaction(function() use ($data) {
             $user = User::create([
@@ -23,9 +21,10 @@ class AuthService {
             $workspace = $user->workspaces()->create([
                 'name' => $data['name'] . "'s Workspace",
                 'slug' => Str::slug($user->name . '-' . uniqid()),
+            ],
+            [
+                'role' => 'owner',
             ]);
-
-            $user->workspaces()->attach($workspace->id, ['role' => 'owner']);
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
