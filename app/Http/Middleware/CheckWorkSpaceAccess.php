@@ -15,7 +15,7 @@ class CheckWorkSpaceAccess
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $workspaceId = $request->header('X-Workspace-Id');
+        $workspaceId = $request->header('X-Workspace-ID');
 
         if(!$workspaceId) {
             return response()->json([
