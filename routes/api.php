@@ -5,7 +5,8 @@ use App\Http\Controllers\WorkspaceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckWorkSpaceAccess;
 use App\Http\Controllers\ProjectController;
-use \App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\WorkSpaceMemberController;
 
 Route::get('/', function () {
     return response()->json([
@@ -22,9 +23,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('workspace', WorkspaceController::class);
 
-    Route::middleware([CheckWorkSpaceAccess::class])->group(function () {
+    Route::middleware(['workspace.access'])->group(function () {
         Route::apiResource('project', ProjectController::class);
         Route::apiResource('projects.tasks', TaskController::class);
+
+        Route::get('workspace-members', [WorkSpaceMemberController::class, 'index']);
+        Route::middleware(['role:owner,admin'])->post('workspace-members', [WorkspaceMemberController::class, 'store']);
     });
 
 });
