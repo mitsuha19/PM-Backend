@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
 
     Route::apiResource('workspace', WorkspaceController::class);
+    Route::post('invitations/{token}/accept', [WorkSpaceMemberController::class, 'acceptInvitation']);
 
     Route::middleware(['workspace.access'])->group(function () {
         Route::apiResource('project', ProjectController::class);

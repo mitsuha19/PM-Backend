@@ -2,9 +2,13 @@
 
 namespace App\Service;
 
+use App\Mail\WorkspaceInviteMail;
 use App\Models\Workspace;
 use App\Models\User;
+use App\Models\WorkspaceInvitation;
 use Exception;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class WorkspaceMemberService
 {
@@ -24,14 +28,45 @@ class WorkspaceMemberService
     public function addMember(int $workspaceId, array $validatedData)
     {
         $workspace = Workspace::findOrFail($workspaceId);
-        $user = User::where('email', $validatedData['email'])->first();
+        $email = $validatedData['email'];
+        $role = $validatedData['role'];
 
-        if ($workspace->users()->where('user_id', $user->id)->exists()) {
-            throw new Exception('Pengguna ini sudah menjadi anggota di Workspace Anda.');
+        $userExistsInWorkspace = $workspace->users()->where('email', $email)->exists();
+        if ($userExistsInWorkspace) {
+            throw new Exception('Pengguna dengan email ini sudah menjadi anggota aktif di Workspace Anda.');
         }
 
-        $workspace->users()->attach($user->id, ['role' => $validatedData['role']]);
+        $token = Str::random(64);
 
-        return $user;
+        $invitation = WorkspaceInvitation::updateOrCreate(
+            ['workspace_id' => $workspaceId, 'email' => $email],
+            ['role' => $role, 'token' => $token]
+        );
+
+        Mail::to($email)->send(new WorkspaceInviteMail($workspace, $role, $token));
+
+        return $invitation;
+    }
+
+    public function acceptInvitation(string $token, \App\Models\User $user)
+    {
+        $invitation = WorkspaceInvitation::where('token', $token)->first();
+
+        if (!$invitation) {
+            throw new Exception('Tautan undangan tidak valid atau sudah kedaluwarsa.');
+        }
+
+        if (strtolower($invitation->email) !== strtolower($user->email)) {
+            throw new Exception('Email akun Anda tidak cocok dengan email tujuan undangan ini.');
+        }
+
+        $workspace = Workspace::findOrFail($invitation->workspace_id);
+
+        if (!$workspace->users()->where('user_id', $user->id)->exists()) {
+            $workspace->users()->attach($user->id, ['role' => $invitation->role]);
+        }
+        $invitation->delete();
+
+        return $workspace;
     }
 }

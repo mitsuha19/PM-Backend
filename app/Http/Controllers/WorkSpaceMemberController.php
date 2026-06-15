@@ -46,6 +46,24 @@ class WorkSpaceMemberController extends Controller
             ], 422);
         }
     }
+
+    public function acceptInvitation(Request $request, string $token)
+    {
+        try {
+            $workspace = $this->memberService->acceptInvitation($token, $request->user());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil bergabung dengan Workspace!',
+                'data' => $workspace
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
 }
 
 
