@@ -16,7 +16,7 @@ class TaskService {
     {
         $project = $this->validateProjectWorkspace($workspaceId, $projectId);
 
-        return $project->tasks()->with('assignee')->get();
+        return $project->tasks()->with('assignee')->where('project_id', $projectId)->get();
     }
 
     public function createTask(int $workspaceId, int $projectId, array $data): Task
@@ -53,7 +53,5 @@ class TaskService {
 
         $task->delete();
     }
-
-
 
 }
